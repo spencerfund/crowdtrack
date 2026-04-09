@@ -12,7 +12,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await GoogleSignIn.instance.initialize(
     serverClientId:
-        "198038988856-qvtn6ndkam35r406p9rmgqbtrj1d3fki.apps.googleusercontent.comr",
+        "198038988856-qvtn6ndkam35r406p9rmgqbtrj1d3fki.apps.googleusercontent.com",
   );
   runApp(const CrowdTrackApp());
 }

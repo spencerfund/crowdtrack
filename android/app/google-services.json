@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "198038988856-egeplbfpl082etat8bacan3qvif3mr5i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.crowdtrack",
+            "certificate_hash": "f094b7e367846c6ea835a1d5a8ef4c94189f08c2"
+          }
+        },
+        {
           "client_id": "198038988856-qvtn6ndkam35r406p9rmgqbtrj1d3fki.apps.googleusercontent.com",
           "client_type": 3
         }
