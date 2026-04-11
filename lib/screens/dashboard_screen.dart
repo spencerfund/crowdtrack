@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+
 import '../models/project.dart';
 import '../services/firebase_service.dart';
 import '../widgets/project_card.dart';
@@ -15,8 +15,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final FirebaseService _firebaseService = FirebaseService();
   String _activeTab = 'backed'; // 'backed' or 'interested'
-  String _searchQuery = '';
-  String _filterPlatform = 'All';
+  final String _searchQuery = '';
+  final String _filterPlatform = 'All';
 
   void _showProjectForm({Project? project}) {
     showModalBottomSheet(
@@ -82,8 +82,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (user == null) return const Scaffold();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F0),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showProjectForm(),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        child: const Icon(Icons.add_rounded, size: 20),
+      ),
       body: StreamBuilder<List<Project>>(
         stream: _firebaseService.streamProjects(user.uid),
         builder: (context, snapshot) {
@@ -99,7 +105,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: Colors.white.withValues(alpha: 0.8),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surface.withValues(alpha: 0.8),
       elevation: 0,
       scrolledUnderElevation: 0,
       title: Row(
@@ -107,20 +115,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF1c1917),
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              LucideIcons.layers,
-              color: Colors.white,
+            child: Icon(
+              Icons.layers_rounded,
+              color: Theme.of(context).colorScheme.onPrimary,
               size: 20,
             ),
           ),
           const SizedBox(width: 12),
-          const Text(
+          Text(
             'CrowdTrack',
             style: TextStyle(
-              color: Color(0xFF1c1917),
+              color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
               fontSize: 22,
             ),
@@ -129,7 +137,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(LucideIcons.logOut, color: Colors.grey),
+          icon: const Icon(Icons.logout_rounded, color: Colors.grey),
           onPressed: () => _firebaseService.signOut(),
         ),
       ],
@@ -146,7 +154,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _searchQuery.toLowerCase(),
       );
       final matchesPlatform =
-          _filterPlatform == 'All' || p.platform == _filterPlatform;
+          _filterPlatform == 'All' || p.platform.displayName == _filterPlatform;
       return matchesTab && matchesSearch && matchesPlatform;
     }).toList();
 
@@ -158,9 +166,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
             ),
             child: Row(
               children: [
@@ -196,16 +206,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
 
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical: 8.0,
-                  ),
-                  child: _buildControls(),
-                ),
-              ),
-
               if (filtered.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
@@ -215,7 +215,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Icon(
-                            LucideIcons.alertCircle,
+                            Icons.error_outline_rounded,
                             size: 64,
                             color: Colors.grey,
                           ),
@@ -252,7 +252,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF1c1917) : Colors.transparent,
+          color: isActive
+              ? Theme.of(context).colorScheme.primary
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.center,
@@ -260,7 +262,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           title,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: isActive ? Colors.white : Colors.grey.shade600,
+            color: isActive
+                ? Theme.of(context).colorScheme.onPrimary
+                : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -274,7 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: _buildStatCard(
             'Backed',
             backedProjects.length.toString(),
-            LucideIcons.box,
+            Icons.inventory_2_rounded,
             Colors.grey.shade100,
             Colors.grey.shade700,
           ),
@@ -284,10 +288,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: _buildStatCard(
             'In Transit',
             backedProjects
-                .where((p) => p.status == 'Shipped')
+                .where((p) => p.status == ProjectStatus.shipped)
                 .length
                 .toString(),
-            LucideIcons.truck,
+            Icons.local_shipping_rounded,
             Colors.orange.shade50,
             Colors.orange.shade600,
           ),
@@ -297,10 +301,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: _buildStatCard(
             'Delivered',
             backedProjects
-                .where((p) => p.status == 'Delivered')
+                .where((p) => p.status == ProjectStatus.delivered)
                 .length
                 .toString(),
-            LucideIcons.checkCircle2,
+            Icons.check_circle_rounded,
             Colors.green.shade50,
             Colors.green.shade600,
           ),
@@ -310,10 +314,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: _buildStatCard(
             'Active',
             backedProjects
-                .where((p) => p.status == 'Funding')
+                .where((p) => p.status == ProjectStatus.funding)
                 .length
                 .toString(),
-            LucideIcons.trendingUp,
+            Icons.trending_up_rounded,
             Colors.blue.shade50,
             Colors.blue.shade600,
           ),
@@ -332,12 +336,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200.withValues(alpha: 0.5),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -357,10 +363,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 12),
           Text(
             label.toUpperCase(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 8,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               letterSpacing: 1,
             ),
             maxLines: 1,
@@ -380,41 +386,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildControls() {
-    return Column(
-      children: [
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton.icon(
-            onPressed: () => _showProjectForm(),
-            icon: const Icon(LucideIcons.plus, size: 20),
-            label: const Text(
-              'New Project',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1c1917),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 4,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   List<Widget> _buildCategorizedLists(List<Project> filtered) {
     final order = [
-      'Shipped',
-      'Pledged',
-      'Funded',
-      'Funding',
-      'Upcoming',
-      'Delivered',
+      ProjectStatus.shipped,
+      ProjectStatus.pledged,
+      ProjectStatus.funded,
+      ProjectStatus.funding,
+      ProjectStatus.upcoming,
+      ProjectStatus.interested,
+      ProjectStatus.delivered,
     ];
 
     return order.map((status) {
@@ -430,7 +410,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Row(
                 children: [
                   Text(
-                    status,
+                    status.displayName,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -442,14 +422,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       statusProjects.length.toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black54,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+
 import '../services/firebase_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -38,7 +38,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 gradient: RadialGradient(
                   colors: [
                     Colors.orange.withValues(alpha: 0.3),
-                    const Color(0xFFF4F4F0).withValues(alpha: 0.0),
+                    Theme.of(
+                      context,
+                    ).colorScheme.surface.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -55,7 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 gradient: RadialGradient(
                   colors: [
                     Colors.green.withValues(alpha: 0.3),
-                    const Color(0xFFF4F4F0).withValues(alpha: 0.0),
+                    Theme.of(
+                      context,
+                    ).colorScheme.surface.withValues(alpha: 0.0),
                   ],
                 ),
               ),
@@ -72,11 +76,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 96,
                     height: 96,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1c1917),
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF1c1917).withOpacity(0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.2),
                           blurRadius: 24,
                           offset: const Offset(0, 8),
                         ),
@@ -84,9 +90,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Transform.rotate(
                       angle: 0.05, // Slight rotation for the dynamic feel
-                      child: const Icon(
-                        LucideIcons.layers,
-                        color: Colors.white,
+                      child: Icon(
+                        Icons.layers_rounded,
+                        color: Theme.of(context).colorScheme.onPrimary,
                         size: 48,
                       ),
                     ),
@@ -95,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'CrowdTrack',
                     style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                      color: const Color(0xFF1c1917),
+                      color: Theme.of(context).colorScheme.primary,
                       fontSize: 48,
                       letterSpacing: -1,
                     ),
@@ -105,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     'Your curated collection of crowdfunding adventures.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                     ),
@@ -117,22 +123,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1c1917),
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 10,
-                        shadowColor: const Color(
-                          0xFF1c1917,
-                        ).withValues(alpha: 0.5),
+                        shadowColor: Theme.of(
+                          context,
+                        ).colorScheme.shadow.withValues(alpha: 0.5),
                       ),
                       child: _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 strokeWidth: 3,
                               ),
                             )
@@ -149,11 +157,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildPlatformLogo(LucideIcons.trendingUp, 'KICKSTARTER'),
+                      _buildPlatformLogo(
+                        context,
+                        Icons.trending_up_rounded,
+                        'KICKSTARTER',
+                      ),
                       const SizedBox(width: 32),
-                      _buildPlatformLogo(LucideIcons.package, 'BACKERKIT'),
+                      _buildPlatformLogo(
+                        context,
+                        Icons.inventory_rounded,
+                        'BACKERKIT',
+                      ),
                       const SizedBox(width: 32),
-                      _buildPlatformLogo(LucideIcons.gamepad2, 'GAMEFOUND'),
+                      _buildPlatformLogo(
+                        context,
+                        Icons.sports_esports_rounded,
+                        'GAMEFOUND',
+                      ),
                     ],
                   ),
                 ],
@@ -165,20 +185,20 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildPlatformLogo(IconData icon, String label) {
+  Widget _buildPlatformLogo(BuildContext context, IconData icon, String label) {
     return Opacity(
       opacity: 0.3,
       child: Column(
         children: [
-          Icon(icon, size: 24, color: const Color(0xFF1c1917)),
+          Icon(icon, size: 24, color: Theme.of(context).colorScheme.onSurface),
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 2,
-              color: Color(0xFF1c1917),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/project.dart';
@@ -22,12 +22,14 @@ class ProjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -36,52 +38,53 @@ class ProjectCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildImageHeader(),
+          _buildImageHeader(context),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    project.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: const Color(0xFF1c1917),
-                    ),
+              children: [
+                Text(
+                  project.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  if (project.creatorName != null && project.creatorName!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4, bottom: 16),
-                      child: Text(
-                        'by ${project.creatorName}',
-                        style: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+                ),
+                if (project.creatorName != null &&
+                    project.creatorName!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 16),
+                    child: Text(
+                      'by ${project.creatorName}',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
-                    )
-                  else
-                    const SizedBox(height: 16),
-                  
+                    ),
+                  )
+                else
                   const SizedBox(height: 16),
-                  _buildDetails(),
-                ],
-              ),
+
+                const SizedBox(height: 16),
+                _buildDetails(context),
+              ],
             ),
-            _buildFooter(),
-          ],
-        ),
+          ),
+          _buildFooter(context),
+        ],
+      ),
     );
   }
 
-  Widget _buildImageHeader() {
+  Widget _buildImageHeader(BuildContext context) {
     return Container(
       height: 200,
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(24),
       ),
       clipBehavior: Clip.antiAlias,
@@ -92,22 +95,32 @@ class ProjectCard extends StatelessWidget {
             Image.network(
               project.imageUrl!,
               fit: BoxFit.cover,
-              errorBuilder: (context, _, __) => const Icon(LucideIcons.box, size: 48, color: Colors.grey),
+              errorBuilder: (context, _, _) => Icon(
+                Icons.inventory_2_rounded,
+                size: 48,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             )
           else
-            const Icon(LucideIcons.box, size: 48, color: Colors.grey),
-          
+            Icon(
+              Icons.inventory_2_rounded,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+
           Positioned(
             top: 12,
             left: 12,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                project.platform.toUpperCase(),
+                project.platform.displayName.toUpperCase(),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -117,11 +130,7 @@ class ProjectCard extends StatelessWidget {
               ),
             ),
           ),
-          Positioned(
-            top: 12,
-            right: 12,
-            child: _buildStatusBadge(),
-          ),
+          Positioned(top: 12, right: 12, child: _buildStatusBadge()),
         ],
       ),
     );
@@ -133,36 +142,40 @@ class ProjectCard extends StatelessWidget {
     IconData icon;
 
     switch (project.status) {
-      case 'Upcoming':
-        bgColor = Colors.amber.shade100.withOpacity(0.8);
+      case ProjectStatus.upcoming:
+        bgColor = Colors.amber.shade100.withValues(alpha: 0.8);
         textColor = Colors.amber.shade900;
-        icon = LucideIcons.calendar;
+        icon = Icons.calendar_month_rounded;
         break;
-      case 'Funding':
-        bgColor = Colors.blue.shade100.withOpacity(0.8);
+      case ProjectStatus.interested:
+        bgColor = Colors.teal.shade100.withValues(alpha: 0.8);
+        textColor = Colors.teal.shade900;
+        icon = Icons.favorite_rounded;
+        break;
+      case ProjectStatus.funding:
+        bgColor = Colors.blue.shade100.withValues(alpha: 0.8);
         textColor = Colors.blue.shade900;
-        icon = LucideIcons.trendingUp;
+        icon = Icons.trending_up_rounded;
         break;
-      case 'Funded':
-        bgColor = Colors.green.shade100.withOpacity(0.8);
+      case ProjectStatus.funded:
+        bgColor = Colors.green.shade100.withValues(alpha: 0.8);
         textColor = Colors.green.shade900;
-        icon = LucideIcons.checkCircle2;
+        icon = Icons.check_circle_rounded;
         break;
-      case 'Pledged':
-        bgColor = Colors.purple.shade100.withOpacity(0.8);
+      case ProjectStatus.pledged:
+        bgColor = Colors.purple.shade100.withValues(alpha: 0.8);
         textColor = Colors.purple.shade900;
-        icon = LucideIcons.package;
+        icon = Icons.inventory_rounded;
         break;
-      case 'Shipped':
-        bgColor = Colors.orange.shade100.withOpacity(0.8);
+      case ProjectStatus.shipped:
+        bgColor = Colors.orange.shade100.withValues(alpha: 0.8);
         textColor = Colors.orange.shade900;
-        icon = LucideIcons.truck;
+        icon = Icons.local_shipping_rounded;
         break;
-      case 'Delivered':
-      default:
-        bgColor = Colors.grey.shade200.withOpacity(0.8);
+      case ProjectStatus.delivered:
+        bgColor = Colors.grey.shade200.withValues(alpha: 0.8);
         textColor = Colors.grey.shade800;
-        icon = LucideIcons.checkCircle2;
+        icon = Icons.check_circle_rounded;
         break;
     }
 
@@ -171,7 +184,7 @@ class ProjectCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: textColor.withOpacity(0.2)),
+        border: Border.all(color: textColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -179,7 +192,7 @@ class ProjectCard extends StatelessWidget {
           Icon(icon, size: 12, color: textColor),
           const SizedBox(width: 6),
           Text(
-            project.status,
+            project.status.displayName,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -192,40 +205,72 @@ class ProjectCard extends StatelessWidget {
     );
   }
 
-  Color _getPlatformColor(String platform) {
+  Color _getPlatformColor(ProjectPlatform platform) {
     switch (platform) {
-      case 'Kickstarter': return Colors.green.shade700;
-      case 'Backerkit': return Colors.blue.shade700;
-      case 'Gamefound': return Colors.orange.shade700;
-      default: return Colors.grey.shade700;
+      case ProjectPlatform.kickstarter:
+        return Colors.green.shade700;
+      case ProjectPlatform.backerkit:
+        return Colors.blue.shade700;
+      case ProjectPlatform.gamefound:
+        return Colors.orange.shade700;
+      case ProjectPlatform.other:
+        return Colors.grey.shade700;
     }
   }
 
-  Widget _buildDetails() {
+  Widget _buildDetails(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (project.estimatedDelivery != null && project.estimatedDelivery!.isNotEmpty)
-          _buildInfoRow(LucideIcons.calendar, 'Est. Delivery', _formatMonthYear(project.estimatedDelivery!), Colors.grey.shade50),
-        
-        if (project.status == 'Upcoming' && project.campaignBeginDate != null)
-          _buildInfoRow(LucideIcons.calendar, 'Begins', _formatDate(project.campaignBeginDate!), Colors.amber.shade50, Colors.amber.shade500),
-          
-        if (project.status == 'Funding' && project.campaignEndDate != null)
-          _buildInfoRow(LucideIcons.calendar, 'Ends', _formatDate(project.campaignEndDate!), Colors.blue.shade50, Colors.blue.shade500),
+        if (project.estimatedDelivery != null &&
+            project.estimatedDelivery!.isNotEmpty)
+          _buildInfoRow(
+            context,
+            Icons.calendar_month_rounded,
+            'Est. Delivery',
+            _formatMonthYear(project.estimatedDelivery!),
+            Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
 
-        if (project.trackingLink != null && project.trackingLink!.isNotEmpty && (project.status == 'Shipped' || project.status == 'Delivered'))
+        if (project.status == ProjectStatus.upcoming &&
+            project.campaignBeginDate != null)
+          _buildInfoRow(
+            context,
+            Icons.calendar_month_rounded,
+            'Begins',
+            _formatDate(project.campaignBeginDate!),
+            Colors.amber.shade50,
+            Colors.amber.shade500,
+          ),
+
+        if (project.status == ProjectStatus.funding &&
+            project.campaignEndDate != null)
+          _buildInfoRow(
+            context,
+            Icons.calendar_month_rounded,
+            'Ends',
+            _formatDate(project.campaignEndDate!),
+            Colors.blue.shade50,
+            Colors.blue.shade500,
+          ),
+
+        if (project.trackingLink != null &&
+            project.trackingLink!.isNotEmpty &&
+            (project.status == ProjectStatus.shipped ||
+                project.status == ProjectStatus.delivered))
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: ElevatedButton.icon(
               onPressed: () => _launchUrl(project.trackingLink!),
-              icon: const Icon(LucideIcons.truck, size: 16),
+              icon: const Icon(Icons.local_shipping_rounded, size: 16),
               label: const Text('Track Package'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange.shade50,
                 foregroundColor: Colors.orange.shade700,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
@@ -236,14 +281,29 @@ class ProjectCard extends StatelessWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Container(
               padding: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey.shade100))),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Theme.of(context).colorScheme.surfaceContainer,
+                  ),
+                ),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Pledge Amount', style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
+                  Text(
+                    'Pledge Amount',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                   Text(
                     '${project.currency ?? '\$'} ${project.pledgeAmount?.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -253,7 +313,14 @@ class ProjectCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value, Color bgColor, [Color? iconColor]) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+    Color bgColor, [
+    Color? iconColor,
+  ]) {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -263,21 +330,36 @@ class ProjectCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: iconColor ?? Colors.grey.shade400),
+          Icon(
+            icon,
+            size: 16,
+            color: iconColor ?? Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 8),
-          Text('$label: $value', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey.shade700)),
+          Text(
+            '$label: $value',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
-        border: Border(top: BorderSide(color: Colors.grey.shade100)),
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -286,14 +368,14 @@ class ProjectCard extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: onEdit,
-                icon: const Icon(LucideIcons.edit2, size: 18),
-                color: Colors.grey.shade400,
-                hoverColor: const Color(0xFF1c1917),
+                icon: const Icon(Icons.edit_rounded, size: 18),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                hoverColor: Theme.of(context).colorScheme.primary,
               ),
               IconButton(
                 onPressed: onDelete,
-                icon: const Icon(LucideIcons.trash2, size: 18),
-                color: Colors.grey.shade400,
+                icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                color: Colors.white.withValues(alpha: 0.9),
                 hoverColor: Colors.red,
               ),
             ],
@@ -303,24 +385,32 @@ class ProjectCard extends StatelessWidget {
               if (!project.backed)
                 ElevatedButton.icon(
                   onPressed: onMarkBacked,
-                  icon: const Icon(LucideIcons.checkCircle2, size: 14),
-                  label: const Text('Mark Backed', style: TextStyle(fontSize: 12)),
+                  icon: const Icon(Icons.check_circle_rounded, size: 14),
+                  label: const Text(
+                    'Mark Backed',
+                    style: TextStyle(fontSize: 12),
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1c1917),
-                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     elevation: 2,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 0,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               if (project.url.isNotEmpty)
                 IconButton(
                   onPressed: () => _launchUrl(project.url),
-                  icon: const Icon(LucideIcons.arrowUpRight, size: 18),
-                  color: Colors.grey.shade600,
+                  icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -341,7 +431,11 @@ class ProjectCard extends StatelessWidget {
     try {
       final parts = dateStr.split('-');
       if (parts.length >= 3) {
-        final date = DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+        final date = DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
         return DateFormat('MMM d, yyyy').format(date);
       }
     } catch (_) {}

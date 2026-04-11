@@ -1,14 +1,66 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum ProjectPlatform {
+  kickstarter,
+  backerkit,
+  gamefound,
+  other;
+
+  String get displayName {
+    switch (this) {
+      case ProjectPlatform.kickstarter: return 'Kickstarter';
+      case ProjectPlatform.backerkit: return 'Backerkit';
+      case ProjectPlatform.gamefound: return 'Gamefound';
+      case ProjectPlatform.other: return 'Other';
+    }
+  }
+
+  static ProjectPlatform fromString(String value) {
+    return ProjectPlatform.values.firstWhere(
+      (e) => e.displayName == value || e.name == value,
+      orElse: () => ProjectPlatform.other,
+    );
+  }
+}
+
+enum ProjectStatus {
+  upcoming,
+  interested,
+  funding,
+  funded,
+  pledged,
+  shipped,
+  delivered;
+
+  String get displayName {
+    switch (this) {
+      case ProjectStatus.upcoming: return 'Upcoming';
+      case ProjectStatus.interested: return 'Interested';
+      case ProjectStatus.funding: return 'Funding';
+      case ProjectStatus.funded: return 'Funded';
+      case ProjectStatus.pledged: return 'Pledged';
+      case ProjectStatus.shipped: return 'Shipped';
+      case ProjectStatus.delivered: return 'Delivered';
+    }
+  }
+
+  static ProjectStatus fromString(String value) {
+    return ProjectStatus.values.firstWhere(
+      (e) => e.displayName == value || e.name == value,
+      orElse: () => ProjectStatus.upcoming,
+    );
+  }
+}
+
 class Project {
   final String id;
   final String userId;
   final String title;
-  final String platform;
+  final ProjectPlatform platform;
   final String url;
   final String? imageUrl;
   final String? creatorName;
-  final String status;
+  final ProjectStatus status;
   final bool backed;
   final double? pledgeAmount;
   final String? currency;
@@ -60,11 +112,11 @@ class Project {
       id: doc.id,
       userId: data['userId'] ?? '',
       title: data['title'] ?? '',
-      platform: data['platform'] ?? 'Kickstarter',
+      platform: ProjectPlatform.fromString(data['platform'] ?? 'Kickstarter'),
       url: data['url'] ?? '',
       imageUrl: data['imageUrl'] as String?,
       creatorName: data['creatorName'] as String?,
-      status: data['status'] ?? 'Upcoming',
+      status: ProjectStatus.fromString(data['status'] ?? 'Upcoming'),
       backed: data['backed'] ?? false,
       pledgeAmount: parseDouble(data['pledgeAmount']),
       currency: data['currency'] as String?,
@@ -82,11 +134,11 @@ class Project {
     return {
       'userId': userId,
       'title': title,
-      'platform': platform,
+      'platform': platform.displayName,
       'url': url,
       'imageUrl': imageUrl,
       'creatorName': creatorName,
-      'status': status,
+      'status': status.displayName,
       'backed': backed,
       'pledgeAmount': pledgeAmount,
       'currency': currency,

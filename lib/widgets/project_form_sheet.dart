@@ -6,11 +6,7 @@ class ProjectFormSheet extends StatefulWidget {
   final Project? project; // If null, it's adding a new project
   final bool initialBacked;
 
-  const ProjectFormSheet({
-    super.key,
-    this.project,
-    this.initialBacked = true,
-  });
+  const ProjectFormSheet({super.key, this.project, this.initialBacked = true});
 
   @override
   State<ProjectFormSheet> createState() => _ProjectFormSheetState();
@@ -22,8 +18,8 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
 
   late String _title;
   late String _creatorName;
-  late String _platform;
-  late String _status;
+  late ProjectPlatform _platform;
+  late ProjectStatus _status;
   late String _url;
   late String _imageUrl;
   late bool _backed;
@@ -43,8 +39,8 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
     final p = widget.project;
     _title = p?.title ?? '';
     _creatorName = p?.creatorName ?? '';
-    _platform = p?.platform ?? 'Kickstarter';
-    _status = p?.status ?? 'Funding';
+    _platform = p?.platform ?? ProjectPlatform.kickstarter;
+    _status = p?.status ?? ProjectStatus.funding;
     _url = p?.url ?? '';
     _imageUrl = p?.imageUrl ?? '';
     _backed = p?.backed ?? widget.initialBacked;
@@ -95,9 +91,9 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving project: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving project: $e')));
         setState(() => _isLoading = false);
       }
     }
@@ -106,16 +102,16 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
       ),
       // Max height to allow scrolling for keyboard
       height: MediaQuery.of(context).size.height * 0.9,
       child: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -124,45 +120,139 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _buildTextField('Project Title', (v) => _title = v, initial: _title, required: true),
-                      _buildTextField('Creator Name', (v) => _creatorName = v, initial: _creatorName),
+                      _buildTextField(
+                        context,
+                        'Project Title',
+                        (v) => _title = v,
+                        initial: _title,
+                        required: true,
+                      ),
+                      _buildTextField(
+                        context,
+                        'Creator Name',
+                        (v) => _creatorName = v,
+                        initial: _creatorName,
+                      ),
                       const SizedBox(height: 16),
-                      _buildDropdown('Platform', ['Kickstarter', 'Backerkit', 'Gamefound', 'Other'], _platform, (v) => setState(() => _platform = v!)),
+                      _buildDropdown<ProjectPlatform>(
+                        context,
+                        'Platform',
+                        ProjectPlatform.values,
+                        _platform,
+                        (v) => setState(() => _platform = v!),
+                        (v) => v.displayName,
+                      ),
                       const SizedBox(height: 16),
-                      _buildDropdown('Status', _backed ? ['Funding', 'Funded', 'Pledged', 'Shipped', 'Delivered'] : ['Upcoming', 'Funding', 'Funded', 'Pledged', 'Shipped', 'Delivered'], _status, (v) => setState(() => _status = v!)),
+                      _buildDropdown<ProjectStatus>(
+                        context,
+                        'Status',
+                        ProjectStatus.values,
+                        _status,
+                        (v) => setState(() => _status = v!),
+                        (v) => v.displayName,
+                      ),
                       const SizedBox(height: 16),
-                      _buildTextField('URL', (v) => _url = v, initial: _url),
-                      _buildTextField('Image URL', (v) => _imageUrl = v, initial: _imageUrl),
+                      _buildTextField(
+                        context,
+                        'URL',
+                        (v) => _url = v,
+                        initial: _url,
+                      ),
+                      _buildTextField(
+                        context,
+                        'Image URL',
+                        (v) => _imageUrl = v,
+                        initial: _imageUrl,
+                      ),
                       if (_backed) ...[
-                        _buildTextField('Pledge Amount', (v) => _pledgeAmount = v, initial: _pledgeAmount, keyboardType: TextInputType.number),
-                        _buildTextField('Currency', (v) => _currency = v, initial: _currency),
+                        _buildTextField(
+                          context,
+                          'Pledge Amount',
+                          (v) => _pledgeAmount = v,
+                          initial: _pledgeAmount,
+                          keyboardType: TextInputType.number,
+                        ),
+                        _buildTextField(
+                          context,
+                          'Currency',
+                          (v) => _currency = v,
+                          initial: _currency,
+                        ),
                       ],
-                      _buildTextField('Estimated Delivery (YYYY-MM)', (v) => _estimatedDelivery = v, initial: _estimatedDelivery),
-                      if (_status == 'Shipped' || _status == 'Delivered')
-                        _buildTextField('Tracking Link', (v) => _trackingLink = v, initial: _trackingLink),
-                      if (_status == 'Upcoming' || _status == 'Funding') ...[
-                         _buildTextField('Campaign Begin Date (YYYY-MM-DD)', (v) => _campaignBeginDate = v, initial: _campaignBeginDate),
-                         _buildTextField('Campaign End Date (YYYY-MM-DD)', (v) => _campaignEndDate = v, initial: _campaignEndDate),
+                      _buildTextField(
+                        context,
+                        'Estimated Delivery (YYYY-MM)',
+                        (v) => _estimatedDelivery = v,
+                        initial: _estimatedDelivery,
+                      ),
+                      if (_status == ProjectStatus.shipped ||
+                          _status == ProjectStatus.delivered)
+                        _buildTextField(
+                          context,
+                          'Tracking Link',
+                          (v) => _trackingLink = v,
+                          initial: _trackingLink,
+                        ),
+                      if (_status == ProjectStatus.upcoming ||
+                          _status == ProjectStatus.funding) ...[
+                        _buildTextField(
+                          context,
+                          'Campaign Begin Date (YYYY-MM-DD)',
+                          (v) => _campaignBeginDate = v,
+                          initial: _campaignBeginDate,
+                        ),
+                        _buildTextField(
+                          context,
+                          'Campaign End Date (YYYY-MM-DD)',
+                          (v) => _campaignEndDate = v,
+                          initial: _campaignEndDate,
+                        ),
                       ],
-                      _buildTextField('Notes', (v) => _notes = v, initial: _notes, maxLines: 3),
-                      
+                      _buildTextField(
+                        context,
+                        'Notes',
+                        (v) => _notes = v,
+                        initial: _notes,
+                        maxLines: 3,
+                      ),
+
                       const SizedBox(height: 24),
                       SizedBox(
                         height: 56,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _submit,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1c1917),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
-                          child: _isLoading 
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : Text(widget.project == null ? 'Save Project' : 'Update Project', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          child: _isLoading
+                              ? CircularProgressIndicator(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                )
+                              : Text(
+                                  widget.project == null
+                                      ? 'Save Project'
+                                      : 'Update Project',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                         ),
                       ),
                       // Add extra padding at the bottom for keyboard
-                      SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
+                      SizedBox(
+                        height: MediaQuery.of(context).viewInsets.bottom,
+                      ),
                     ],
                   ),
                 ),
@@ -174,46 +264,86 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+          ),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             widget.project == null ? 'New Project' : 'Edit Project',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF1c1917)),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.pop(context),
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTextField(String label, ValueChanged<String> onSaved, {String initial = '', bool required = false, TextInputType? keyboardType, int maxLines = 1}) {
+  Widget _buildTextField(
+    BuildContext context,
+    String label,
+    ValueChanged<String> onSaved, {
+    String initial = '',
+    bool required = false,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey.shade500)),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 8),
           TextFormField(
             initialValue: initial,
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.grey.shade50,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade200)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade200)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF1c1917))),
+              fillColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
             keyboardType: keyboardType,
             maxLines: maxLines,
@@ -225,24 +355,53 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
     );
   }
 
-  Widget _buildDropdown(String label, List<String> items, String value, ValueChanged<String?> onChanged) {
-    // If somehow the existing status isn't in the list, fallback to first item
-    String effectiveValue = items.contains(value) ? value : items.first;
-    
+  Widget _buildDropdown<T>(
+    BuildContext context,
+    String label,
+    List<T> items,
+    T value,
+    ValueChanged<T?> onChanged,
+    String Function(T) itemLabel,
+  ) {
+    // If somehow the existing value isn't in the list, fallback to first item
+    T effectiveValue = items.contains(value) ? value : items.first;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5, color: Colors.grey.shade500)),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: effectiveValue,
+        DropdownButtonFormField<T>(
+          initialValue: effectiveValue,
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade200)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade200)),
+            fillColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+            ),
           ),
-          items: items.map((i) => DropdownMenuItem(value: i, child: Text(i))).toList(),
+          items: items
+              .map((i) => DropdownMenuItem(value: i, child: Text(itemLabel(i))))
+              .toList(),
           onChanged: onChanged,
         ),
       ],
