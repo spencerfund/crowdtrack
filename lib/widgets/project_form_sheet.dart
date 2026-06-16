@@ -325,7 +325,7 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
               filled: true,
               fillColor: Theme.of(
                 context,
-              ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide(
@@ -385,7 +385,7 @@ class _ProjectFormSheetState extends State<ProjectFormSheet> {
             filled: true,
             fillColor: Theme.of(
               context,
-            ).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(

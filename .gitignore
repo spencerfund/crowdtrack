@@ -133,7 +133,7 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 
 # Local Firebase Config
-firebase_config.json
+.env
 
 
 

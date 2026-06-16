@@ -20,7 +20,7 @@ class DefaultFirebaseOptions {
       if (web.apiKey.isEmpty) {
         throw UnsupportedError(
           'Firebase Web API Key is empty. Make sure you run the app using:\n'
-          'flutter run --dart-define-from-file=firebase_config.json'
+          'flutter run --dart-define-from-file=.env'
         );
       }
       return web;
@@ -30,7 +30,7 @@ class DefaultFirebaseOptions {
         if (android.apiKey.isEmpty) {
           throw UnsupportedError(
             'Firebase Android API Key is empty. Make sure you run the app using:\n'
-            'flutter run --dart-define-from-file=firebase_config.json'
+            'flutter run --dart-define-from-file=.env'
           );
         }
         return android;
