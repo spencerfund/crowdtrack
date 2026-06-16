@@ -17,10 +17,22 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
+      if (web.apiKey.isEmpty) {
+        throw UnsupportedError(
+          'Firebase Web API Key is empty. Make sure you run the app using:\n'
+          'flutter run --dart-define-from-file=firebase_config.json'
+        );
+      }
       return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
+        if (android.apiKey.isEmpty) {
+          throw UnsupportedError(
+            'Firebase Android API Key is empty. Make sure you run the app using:\n'
+            'flutter run --dart-define-from-file=firebase_config.json'
+          );
+        }
         return android;
       case TargetPlatform.iOS:
         throw UnsupportedError(
@@ -50,7 +62,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDaWZTWY6h6qggsIDQ3k7P_c09U-_Xn970',
+    apiKey: String.fromEnvironment('FIREBASE_WEB_API_KEY'),
     appId: '1:198038988856:web:3a04f50e6f462ff62d1ecd',
     messagingSenderId: '198038988856',
     projectId: 'gen-lang-client-0855676972',
@@ -60,7 +72,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDhOvR91JB4GfUFjKtUEWEbEGcGfXXOW5c',
+    apiKey: String.fromEnvironment('FIREBASE_ANDROID_API_KEY'),
     appId: '1:198038988856:android:d53018c7867c13922d1ecd',
     messagingSenderId: '198038988856',
     projectId: 'gen-lang-client-0855676972',

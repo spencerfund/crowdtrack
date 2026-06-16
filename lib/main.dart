@@ -12,6 +12,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await GoogleSignIn.instance.initialize(
+    clientId:
+        "198038988856-qvtn6ndkam35r406p9rmgqbtrj1d3fki.apps.googleusercontent.com",
     serverClientId:
         "198038988856-qvtn6ndkam35r406p9rmgqbtrj1d3fki.apps.googleusercontent.com",
   );
